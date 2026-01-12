@@ -62,3 +62,65 @@ volumes:
 - db:5432
 
 **Answer** db:5432
+
+## Question 3. Trip Segmentation Count
+
+During the period of October 1st 2019 (inclusive) and November 1st 2019 (exclusive), how many trips, respectively, happened:
+
+Up to 1 mile
+In between 1 (exclusive) and 3 miles (inclusive),
+In between 3 (exclusive) and 7 miles (inclusive),
+In between 7 (exclusive) and 10 miles (inclusive),
+Over 10 miles
+
+```sql
+SELECT
+	CASE
+		WHEN trip_distance <= 1 THEN '1. <=1'
+		WHEN trip_distance > 1 AND trip_distance <= 3 THEN '2. < RANGE <=3'
+		WHEN trip_distance > 3 AND trip_distance <= 7 THEN '3. < RANGE <=7'
+		WHEN trip_distance > 7 AND trip_distance <= 10 THEN '4. < RANGE <=10'
+		WHEN trip_distance > 10 THEN '5. > 10'
+		ELSE 'OTHERS'
+	END AS distance_ranges,
+	COUNT(1) AS COUNTS
+FROM public.green_taxi
+WHERE lpep_pickup_datetime >= '2019-10-01' AND lpep_pickup_datetime < '2019-11-01'
+GROUP BY distance_ranges
+ORDER BY distance_ranges;
+```
+
+**Answers:** 104830; 198995; 109642; 27686; 35201;
+
+## Question 4. Longest trip for each day
+
+Which was the pick up day with the longest trip distance? Use the pick up time for your calculations.
+
+Tip: For every day, we only care about one single trip with the longest distance.
+
+```sql
+SELECT trip_distance , CAST(lpep_pickup_datetime AS DATE) as pickup_day
+FROM public.green_taxi
+ORDER BY trip_distance DESC
+LIMIT 1;
+```
+
+**Answers:** 2019-10-31
+
+## Question 5. Three biggest pickup zones
+
+Which were the top pickup locations with over 13,000 in total_amount (across all trips) for 2019-10-18?
+
+Consider only lpep_pickup_datetime when filtering by date.
+
+```sql
+SELECT Z."Zone" , SUM(GT."total_amount") AS total_revenue
+FROM public.green_taxi AS GT INNER JOIN public.zones AS Z ON (GT."PULocationID" = Z."LocationID")
+WHERE CAST(GT."lpep_pickup_datetime" AS DATE) = '2019-10-18'
+GROUP BY Z."Zone"
+HAVING SUM(GT."total_amount") > 13000
+ORDER BY total_revenue DESC
+LIMIT 3;
+```
+
+**Answers:** East Harlem North; East Harlem South; Morningside Heights;
