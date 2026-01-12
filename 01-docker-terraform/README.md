@@ -124,3 +124,20 @@ LIMIT 3;
 ```
 
 **Answers:** East Harlem North; East Harlem South; Morningside Heights;
+
+## Question 6. Largest tip
+
+For the passengers picked up in October 2019 in the zone named "East Harlem North" which was the drop off zone that had the largest tip?
+
+Note: it's tip , not trip
+
+```sql
+SELECT z_drop."Zone" as zone_drop_name , gt."tip_amount"
+FROM public.zones AS z_pickup INNER JOIN public.green_taxi AS gt ON (z_pickup."LocationID" = gt."PULocationID")
+INNER JOIN public.zones AS z_drop ON (z_drop."LocationID" = gt."DOLocationID")
+WHERE gt."lpep_pickup_datetime" >= '2019-10-01' AND gt."lpep_pickup_datetime" < '2019-11-01' AND z_pickup."Zone" = 'East Harlem North'
+ORDER BY gt."tip_amount" DESC
+LIMIT 1;
+```
+
+**Answers:** JFK Airport
